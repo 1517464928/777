@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter, Noto_Sans_SC } from "next/font/google";
 import "./globals.css";
 import BackgroundWrapper from "@/components/BackgroundWrapper";
-import { EditProvider } from "@/components/EditMode";
 import { MusicProvider } from "@/components/MusicContext";
 import BackgroundMusic from "@/components/BackgroundMusic";
 
@@ -26,14 +25,12 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" className={`${inter.variable} ${notoSansSC.variable}`}>
       <body>
-        <EditProvider>
-          <MusicProvider>
-            <BackgroundWrapper>
-              {children}
-              <BackgroundMusic />
-            </BackgroundWrapper>
-          </MusicProvider>
-        </EditProvider>
+        <MusicProvider>
+          <BackgroundWrapper>
+            {children}
+            <BackgroundMusic />
+          </BackgroundWrapper>
+        </MusicProvider>
       </body>
     </html>
   );

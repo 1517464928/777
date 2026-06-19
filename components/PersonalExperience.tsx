@@ -1,18 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, ChevronDown } from "lucide-react";
-import { useEditMode } from "./EditMode";
+import { ChevronDown } from "lucide-react";
 import {
-  parseStyle,
-  stringifyPanels,
-  stringifyStyle,
   type AdvantageData,
-  type BlockStyle,
   type ExperienceData,
-  type ExperiencePanel,
-  type SiteConfigData,
 } from "@/lib/types";
 import {
   introVariants,
@@ -30,8 +23,6 @@ const typeLabels: Record<string, string> = {
   campus: "校园经历",
 };
 const types = ["education", "work", "entrepreneurship", "campus"];
-
-const SAVE_ID = "experiences";
 
 // Background gradient stops for the /about scroll experience.
 // Progress 0 = intro cream, 1 = AI project peak.
@@ -95,11 +86,10 @@ function getGradient(progress: number): string {
   return `#faf7f4`;
 }
 
-export default function PersonalExperience({ initialData }: { initialData?: Record<string, unknown> | null }) {
-  const { isEditing, registerSave, unregisterSave, setHasUnsavedChanges } = useEditMode();
-  const [items, setItems] = useState<ExperienceData[]>(initialData?.experiences as ExperienceData[] || []);
-  const [advantages, setAdvantages] = useState<AdvantageData[]>(initialData?.advantages as AdvantageData[] || []);
-  const [loading, setLoading] = useState(!initialData);
+export default function PersonalExperience() {
+  const [items, setItems] = useState<ExperienceData[]>([]);
+  const [advantages, setAdvantages] = useState<AdvantageData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [advantagePage, setAdvantagePage] = useState(0);
@@ -109,9 +99,6 @@ export default function PersonalExperience({ initialData }: { initialData?: Reco
   const didInitialLoad = useRef(false);
   const screenRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Ref mirror of items so the registered save fn always reads the latest state.
-  const itemsRef = useRef<ExperienceData[]>(items);
-  useEffect(() => { itemsRef.current = items; }, [items]);
   // After data loads and DOM updates, force scroll to top
   useEffect(() => {
     if (loading || didInitialLoad.current || items.length === 0) return;
@@ -128,11 +115,7 @@ export default function PersonalExperience({ initialData }: { initialData?: Reco
 
   useEffect(() => {
     setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-    if (initialData) {
-      setLoading(false);
-      return;
-    }
-    fetch("/api/public")
+    fetch("/data.json")
       .then((r) => r.json())
       .then((d) => {
         setItems(d.experiences || []);
@@ -141,7 +124,7 @@ export default function PersonalExperience({ initialData }: { initialData?: Reco
         didInitialLoad.current = false;
       })
       .catch(() => setLoading(false));
-  }, [initialData]);
+  }, []);
 
   const screens = [
     { type: "intro" as const },
@@ -166,82 +149,6 @@ export default function PersonalExperience({ initialData }: { initialData?: Reco
     overallProgress = 1;
   }
   const backgroundStyle = getGradient(overallProgress);
-
-  // Register save fn: PUT all experiences to the server when 保存 is clicked.
-  const saveFn = useCallback(async () => {
-    const res = await fetch("/api/admin/experiences", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ experiences: itemsRef.current }),
-    });
-    return res.ok;
-  }, []);
-
-  useEffect(() => {
-    registerSave(SAVE_ID, saveFn);
-    return () => unregisterSave(SAVE_ID);
-  }, [registerSave, unregisterSave, saveFn]);
-
-  // Use functional update so rapid edits don't read stale state. Local state only;
-  // the actual API call is deferred until the user clicks 保存.
-  const updExp = (id: number, field: string, val: string) => {
-    setItems((prev) => prev.map((s) =>
-      s.id === id ? ({ ...s, [field]: val } as ExperienceData) : s
-    ));
-    setHasUnsavedChanges(true);
-  };
-
-  const updExpStyle = (id: number, key: string, style: BlockStyle) => {
-    setItems((prev) => prev.map((s) => {
-      if (s.id !== id) return s;
-      const map = parseStyle(s.style);
-      map[key] = style;
-      return { ...s, style: stringifyStyle(map) };
-    }));
-    setHasUnsavedChanges(true);
-  };
-
-  const addExp = () => {
-    const newExp: ExperienceData = {
-      id: -Date.now(),
-      type: "work",
-      title: "新经历",
-      subtitle: "",
-      period: "",
-      description: "",
-      detail1: "",
-      detail2: "",
-      workContent: "",
-      achievements: "",
-      growth: "",
-      panel1Title: "",
-      panel2Title: "",
-      panel3Title: "",
-      panel4Title: "",
-      panels: "[]",
-      style: "{}",
-      order: items.length,
-    };
-    const newIndex = items.length + 1;
-    setItems((prev) => [...prev, newExp]);
-    setHasUnsavedChanges(true);
-    setTimeout(() => scrollToScreen(newIndex), 50);
-  };
-
-  const removeExp = (id: number) => {
-    const target = Math.max(0, activeIndex - 1);
-    setItems((prev) => prev.filter((s) => s.id !== id));
-    setHasUnsavedChanges(true);
-    setTimeout(() => scrollToScreen(target), 50);
-  };
-
-  const updPanels = (expId: number, panels: ExperiencePanel[]) => {
-    setItems((prev) => prev.map((s) =>
-      s.id === expId ? { ...s, panels: stringifyPanels(panels) } : s
-    ));
-    setHasUnsavedChanges(true);
-  };
 
   const scrollToScreen = (index: number) => {
     const el = screenRefs.current[index];
@@ -337,10 +244,6 @@ export default function PersonalExperience({ initialData }: { initialData?: Reco
                 index={i}
                 isActive={activeIndex === i}
                 reducedMotion={reducedMotion}
-                updExp={updExp}
-                removeExp={removeExp}
-                updPanels={updPanels}
-                updStyle={updExpStyle}
               />
             )}
             {screen.type === "advantages" && (
@@ -399,18 +302,6 @@ export default function PersonalExperience({ initialData }: { initialData?: Reco
           </button>
         ))}
       </div>
-
-      {/* Edit toolbar */}
-      {isEditing && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-2 bg-white rounded-full shadow-lg border border-[#1a1a1a]/5">
-          <button
-            onClick={addExp}
-            className="flex items-center gap-1 text-sm font-medium text-[#f97316] hover:text-[#ea580c] cursor-pointer"
-          >
-            <Plus size={16} /> 添加经历
-          </button>
-        </div>
-      )}
 
     </div>
   );
@@ -515,7 +406,6 @@ function ProjectsScreen({
           subtitle="看看我做了什么"
           footerText="关键数据保密需要，以上演示均用模拟网站演示"
           filterFn={(items) => items.slice(0, 4)}
-          saveId="projects"
         />
       </motion.div>
 
@@ -565,7 +455,6 @@ function ProjectsScreen2({
           subtitle="其他领域（比如电商）的探索"
           footerText="借助飞书cli搭建的多维表格"
           filterFn={(items) => items.slice(4, 6)}
-          saveId="projects2"
         />
       </motion.div>
 

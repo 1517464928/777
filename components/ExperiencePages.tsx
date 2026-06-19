@@ -2,17 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, type PanInfo } from "framer-motion";
-import { Plus, Trash2, ChevronRight, ChevronDown } from "lucide-react";
-import { useEditMode } from "./EditMode";
-import { EditableText } from "./ui/InlineEdit";
-import { EditableBlock } from "./ui/EditableBlock";
-import { parsePanels, parseStyle, type BlockStyle, type ExperienceData, type ExperiencePanel } from "@/lib/types";
+import { ChevronRight, ChevronDown } from "lucide-react";
+import { parsePanels, type ExperienceData, type ExperiencePanel } from "@/lib/types";
 import {
   expHeroVariants,
   expDetailVariants,
-  heroToDetailVariants,
-  detailToDetailVariants,
-  detailToHeroVariants,
 } from "@/lib/animations";
 
 const typeLabels: Record<string, string> = {
@@ -21,17 +15,12 @@ const typeLabels: Record<string, string> = {
   entrepreneurship: "创业经历",
   campus: "校园经历",
 };
-const types = ["education", "work", "entrepreneurship", "campus"];
 
 interface Props {
   exp: ExperienceData;
   index: number;
   isActive: boolean;
   reducedMotion: boolean;
-  updExp: (id: number, field: string, val: string) => void;
-  removeExp: (id: number) => void;
-  updPanels: (expId: number, panels: ExperiencePanel[]) => void;
-  updStyle: (id: number, key: string, style: BlockStyle) => void;
 }
 
 function getInitialPanels(exp: ExperienceData): ExperiencePanel[] {
@@ -49,16 +38,9 @@ export default function ExperiencePages({
   index,
   isActive,
   reducedMotion,
-  updExp,
-  removeExp,
-  updPanels,
-  updStyle,
 }: Props) {
-  const { isEditing, isBlockInteracting } = useEditMode();
   const [panels, setPanels] = useState<ExperiencePanel[]>(() => getInitialPanels(exp));
   const [pageIndex, setPageIndex] = useState(0);
-  const [direction, setDirection] = useState(0);
-  const styleMap = parseStyle(exp.style);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -68,33 +50,6 @@ export default function ExperiencePages({
   }, [exp]);
 
   const totalPages = panels.length + 1;
-
-  const savePanels = (next: ExperiencePanel[]) => {
-    setPanels(next);
-    updPanels(exp.id, next);
-  };
-
-  const updatePanelTitle = (i: number, val: string) => {
-    const next = panels.map((p, idx) => (idx === i ? { ...p, title: val } : p));
-    savePanels(next);
-  };
-
-  const updatePanelContent = (i: number, val: string) => {
-    const next = panels.map((p, idx) => (idx === i ? { ...p, content: val } : p));
-    savePanels(next);
-  };
-
-  const updateBlockStyle = (key: string, s: BlockStyle) => {
-    updStyle(exp.id, key, s);
-  };
-
-  const updatePanelStyle = (i: number, field: "title" | "content", s: BlockStyle) => {
-    const next = panels.map((p, idx) => {
-      if (idx !== i) return p;
-      return { ...p, style: { ...p.style, [field]: s } };
-    });
-    savePanels(next);
-  };
 
   const scrollToPage = (idx: number) => {
     const el = pageRefs.current[idx];
@@ -108,14 +63,12 @@ export default function ExperiencePages({
 
   const nextPage = () => {
     if (pageIndex < totalPages - 1) {
-      setDirection(1);
       scrollToPage(pageIndex + 1);
     }
   };
 
   const prevPage = () => {
     if (pageIndex > 0) {
-      setDirection(-1);
       scrollToPage(pageIndex - 1);
     }
   };
@@ -129,29 +82,6 @@ export default function ExperiencePages({
         block: "start",
       });
     }
-  };
-
-  const addPanel = () => {
-    const newPanel = { title: "新页面", content: "" };
-    let next: ExperiencePanel[];
-    let newPageIndex: number;
-    if (pageIndex === 0) {
-      next = [...panels, newPanel];
-      newPageIndex = next.length;
-    } else {
-      next = [...panels.slice(0, pageIndex), newPanel, ...panels.slice(pageIndex)];
-      newPageIndex = pageIndex + 1;
-    }
-    savePanels(next);
-    setTimeout(() => scrollToPage(newPageIndex), 50);
-  };
-
-  const removeCurrentPanel = () => {
-    if (pageIndex === 0) return;
-    const panelIdx = pageIndex - 1;
-    const next = panels.filter((_, i) => i !== panelIdx);
-    savePanels(next);
-    setTimeout(() => scrollToPage(pageIndex - 1), 50);
   };
 
   // Active page tracking
@@ -200,7 +130,7 @@ export default function ExperiencePages({
     "h-full w-full flex-shrink-0 snap-start flex items-center justify-center px-6 md:px-12 py-16 relative overflow-hidden";
 
   const dragProps = {
-    drag: (isBlockInteracting ? false : "x") as "x" | false,
+    drag: "x" as const,
     dragConstraints: { left: 0, right: 0 },
     dragElastic: 0.15,
     onDragEnd: (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -224,37 +154,15 @@ export default function ExperiencePages({
         </span>
 
         <div className="relative z-10 flex flex-col items-center">
-          {isEditing ? (
-            <motion.div
-              variants={heroV}
-              initial="hidden"
-              animate={show ? "visible" : "hidden"}
-              custom={0}
-              className="mb-4"
-            >
-              <select
-                value={exp.type}
-                onChange={(e) => updExp(exp.id, "type", e.target.value)}
-                className="inline-block px-3 py-1 text-xs font-medium bg-amber-50 text-[#f97316] rounded-full border border-[#f97316]/30 focus:outline-none focus:ring-2 focus:ring-[#f97316]/30 cursor-pointer"
-              >
-                {types.map((t) => (
-                  <option key={t} value={t}>
-                    {typeLabels[t]}
-                  </option>
-                ))}
-              </select>
-            </motion.div>
-          ) : (
-            <motion.span
-              variants={heroV}
-              initial="hidden"
-              animate={show ? "visible" : "hidden"}
-              custom={0}
-              className="inline-block px-3 py-1 text-xs font-medium bg-amber-50 text-[#f97316] rounded-full mb-4"
-            >
-              {typeLabels[exp.type] || exp.type}
-            </motion.span>
-          )}
+          <motion.span
+            variants={heroV}
+            initial="hidden"
+            animate={show ? "visible" : "hidden"}
+            custom={0}
+            className="inline-block px-3 py-1 text-xs font-medium bg-amber-50 text-[#f97316] rounded-full mb-4"
+          >
+            {typeLabels[exp.type] || exp.type}
+          </motion.span>
 
           <motion.h2
             variants={heroV}
@@ -263,9 +171,7 @@ export default function ExperiencePages({
             custom={0.08}
             className="text-4xl md:text-6xl font-bold text-[#1a1a1a] mb-3"
           >
-            <EditableBlock blockKey="title" style={styleMap.title} onStyleChange={(s) => updateBlockStyle("title", s)} className="inline-block">
-              <EditableText value={exp.title} onSave={(v) => updExp(exp.id, "title", v)} />
-            </EditableBlock>
+            {exp.title}
           </motion.h2>
 
           <motion.div
@@ -275,9 +181,7 @@ export default function ExperiencePages({
             custom={0.16}
             className="text-lg md:text-xl text-[#1a1a1a]/70 mb-2"
           >
-            <EditableBlock blockKey="subtitle" style={styleMap.subtitle} onStyleChange={(s) => updateBlockStyle("subtitle", s)} className="inline-block">
-              <EditableText value={exp.subtitle} onSave={(v) => updExp(exp.id, "subtitle", v)} />
-            </EditableBlock>
+            {exp.subtitle}
           </motion.div>
 
           <motion.div
@@ -287,9 +191,7 @@ export default function ExperiencePages({
             custom={0.24}
             className="text-sm text-[#1a1a1a]/40 mb-6"
           >
-            <EditableBlock blockKey="period" style={styleMap.period} onStyleChange={(s) => updateBlockStyle("period", s)} className="inline-block">
-              <EditableText value={exp.period} onSave={(v) => updExp(exp.id, "period", v)} />
-            </EditableBlock>
+            {exp.period}
           </motion.div>
 
           <motion.div
@@ -297,30 +199,12 @@ export default function ExperiencePages({
             initial="hidden"
             animate={show ? "visible" : "hidden"}
             custom={0.32}
-            className="max-w-2xl text-base md:text-lg text-[#1a1a1a]/70 leading-relaxed"
+            className="max-w-2xl text-base md:text-lg text-[#1a1a1a]/70 leading-relaxed whitespace-pre-line"
           >
-            <EditableBlock blockKey="description" style={styleMap.description} onStyleChange={(s) => updateBlockStyle("description", s)} className="inline-block">
-              <EditableText
-                multiline
-                value={exp.description}
-                onSave={(v) => updExp(exp.id, "description", v)}
-              />
-            </EditableBlock>
+            {exp.description}
           </motion.div>
 
-          {isEditing && (
-            <motion.button
-              initial={{ opacity: 0 }}
-              animate={show ? { opacity: 1 } : { opacity: 0 }}
-              transition={reducedMotion ? { duration: 0 } : { duration: 0.4, delay: 0.4 }}
-              onClick={() => removeExp(exp.id)}
-              className="mt-8 text-sm text-red-400 hover:text-red-600 transition-colors cursor-pointer"
-            >
-              删除此经历
-            </motion.button>
-          )}
-
-          {panels.length > 0 && !isEditing && (
+          {panels.length > 0 && (
             <motion.button
               variants={heroV}
               initial="hidden"
@@ -367,17 +251,7 @@ export default function ExperiencePages({
             className="bg-white/80 backdrop-blur rounded-2xl border border-[#1a1a1a]/5 shadow-sm px-6 py-5 md:px-8 md:py-6"
           >
             <div className="text-3xl md:text-5xl font-bold text-[#1a1a1a]">
-              <EditableBlock
-                blockKey={`panel-${panelIndex}-title`}
-                style={panel.style?.title}
-                onStyleChange={(s) => updatePanelStyle(panelIndex, "title", s)}
-                className="inline-block"
-              >
-                <EditableText
-                  value={panel.title}
-                  onSave={(v) => updatePanelTitle(panelIndex, v)}
-                />
-              </EditableBlock>
+              {panel.title}
             </div>
           </motion.div>
 
@@ -388,35 +262,22 @@ export default function ExperiencePages({
             custom={0.08}
             className="bg-white/60 backdrop-blur rounded-2xl border border-[#1a1a1a]/5 shadow-sm px-6 py-5 md:px-8 md:py-6"
           >
-            <div className="text-base md:text-lg text-[#1a1a1a]/70 leading-relaxed">
-              <EditableBlock
-                blockKey={`panel-${panelIndex}-content`}
-                style={panel.style?.content}
-                onStyleChange={(s) => updatePanelStyle(panelIndex, "content", s)}
-                className="inline-block w-full"
-              >
-                <EditableText
-                  multiline
-                  value={panel.content}
-                  onSave={(v) => updatePanelContent(panelIndex, v)}
-                />
-              </EditableBlock>
+            <div className="text-base md:text-lg text-[#1a1a1a]/70 leading-relaxed whitespace-pre-line">
+              {panel.content}
             </div>
           </motion.div>
         </div>
 
-        {!isEditing && (
-          <motion.button
-            variants={detailV}
-            initial="hidden"
-            animate={show ? "visible" : "hidden"}
-            custom={0.16}
-            onClick={isLast ? scrollToNextScreen : nextPage}
-            className="mt-8 inline-flex items-center gap-2 px-8 py-4 bg-[#f97316] text-white rounded-full text-lg font-medium hover:bg-[#ea580c] transition-colors cursor-pointer"
-          >
-            GO {isLast ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
-          </motion.button>
-        )}
+        <motion.button
+          variants={detailV}
+          initial="hidden"
+          animate={show ? "visible" : "hidden"}
+          custom={0.16}
+          onClick={isLast ? scrollToNextScreen : nextPage}
+          className="mt-8 inline-flex items-center gap-2 px-8 py-4 bg-[#f97316] text-white rounded-full text-lg font-medium hover:bg-[#ea580c] transition-colors cursor-pointer"
+        >
+          GO {isLast ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+        </motion.button>
       </motion.div>
     );
   }
@@ -472,27 +333,6 @@ export default function ExperiencePages({
           {String(index).padStart(2, "0")} · {pageIndex + 1}/{totalPages}
         </span>
       </div>
-
-      {/* Edit toolbar */}
-      {isEditing && (
-        <div className="absolute bottom-8 left-6 z-20 flex items-center gap-2">
-          <button
-            onClick={addPanel}
-            className="flex items-center gap-1 px-3 h-11 text-sm font-medium text-[#f97316] hover:bg-amber-50 rounded-full border border-[#f97316]/20 cursor-pointer"
-          >
-            <Plus size={16} /> 添加页面
-          </button>
-          {pageIndex > 0 && (
-            <button
-              onClick={removeCurrentPanel}
-              className="w-11 h-11 flex items-center justify-center rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 border border-red-200 cursor-pointer"
-              aria-label="删除当前页面"
-            >
-              <Trash2 size={18} />
-            </button>
-          )}
-        </div>
-      )}
     </div>
   );
 }

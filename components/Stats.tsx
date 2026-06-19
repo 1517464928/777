@@ -1,49 +1,19 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Reveal from "./ui/Reveal";
-import { EditableText } from "./ui/InlineEdit";
-import { useEditMode } from "./EditMode";
 
 interface Stat { id: number; label: string; value: string; order: number; }
 
-const SAVE_ID = "stats";
-
 export default function StatsSection() {
-  const { isEditing, registerSave, unregisterSave, setHasUnsavedChanges } = useEditMode();
   const [stats, setStats] = useState<Stat[]>([]);
   const [loading, setLoading] = useState(true);
-  const statsRef = useRef<Stat[]>(stats);
-  useEffect(() => { statsRef.current = stats; }, [stats]);
 
   useEffect(() => {
-    fetch("/api/public", { credentials: "include" }).then(r => r.json()).then(d => {
+    fetch("/data.json").then(r => r.json()).then(d => {
       setStats(d.stats || []);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
-
-  // Register save fn: PUT all changed stats to the server.
-  const saveFn = useCallback(async () => {
-    const changed = statsRef.current;
-    if (!changed.length) return true;
-    const res = await fetch("/api/admin/stats", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ stats: changed }),
-    });
-    return res.ok;
-  }, []);
-
-  useEffect(() => {
-    registerSave(SAVE_ID, saveFn);
-    return () => unregisterSave(SAVE_ID);
-  }, [registerSave, unregisterSave, saveFn]);
-
-  const saveStat = (next: Stat) => {
-    setStats((prev) => prev.map((s) => (s.id === next.id ? next : s)));
-    setHasUnsavedChanges(true);
-  };
 
   if (loading) return null;
 
@@ -70,12 +40,12 @@ export default function StatsSection() {
                   </span>
                   <div className="flex-1 py-5 pr-4 min-w-0">
                     <p className="text-sm font-medium text-[#1a1a1a]/70">
-                      <EditableText value={s.label} onSave={(v) => saveStat({ ...s, label: v })} />
+                      {s.label}
                     </p>
                   </div>
                   <div className="py-5 pr-4 text-right tabular-nums">
                     <span className="text-lg font-semibold text-[#1a1a1a]">
-                      <EditableText value={s.value} onSave={(v) => saveStat({ ...s, value: v })} />
+                      {s.value}
                     </span>
                   </div>
                 </div>
