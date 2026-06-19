@@ -336,6 +336,7 @@ export default function ExperiencePages({
     const show = isActive && pageIndex === panelIndex + 1;
     const number = `${String(index).padStart(2, "0")}-${panelIndex + 1}`;
     const detailV = expDetailVariants(reducedMotion);
+    const isLast = panelIndex === panels.length - 1;
 
     return (
       <motion.div
@@ -392,6 +393,19 @@ export default function ExperiencePages({
             </div>
           </motion.div>
         </div>
+
+        {!isLast && !isEditing && (
+          <motion.button
+            variants={detailV}
+            initial="hidden"
+            animate={show ? "visible" : "hidden"}
+            custom={0.16}
+            onClick={nextPage}
+            className="mt-8 inline-flex items-center gap-2 px-8 py-4 bg-[#f97316] text-white rounded-full text-lg font-medium hover:bg-[#ea580c] transition-colors cursor-pointer"
+          >
+            GO <ChevronRight size={20} />
+          </motion.button>
+        )}
       </motion.div>
     );
   }
