@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
@@ -473,6 +473,7 @@ function ProjectsScreen2({ isActive, reducedMotion }: { isActive: boolean; reduc
         <ProjectsSection
           title="AI 项目"
           subtitle="其他领域（比如电商）的探索"
+          footerText="借助飞书cli搭建的多维表格"
           filterFn={(items) => items.slice(4, 6)}
           saveId="projects2"
         />
