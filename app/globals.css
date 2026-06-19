@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #f97316;
+  --color-primary-hover: #ea580c;
+  --font-sans: "Inter", "Noto Sans SC", sans-serif;
+  --font-serif: "Noto Serif SC", Georgia, "Times New Roman", serif;
+  --font-mono: "SF Mono", "Menlo", "Monaco", "Consolas", "Noto Sans SC", monospace;
+}
+
+body {
+  @apply bg-white text-[#1a1a1a] font-sans antialiased;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbar for horizontal swipe */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+

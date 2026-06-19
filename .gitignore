@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.next/
+
+# Secrets & environment
+.env.local
+.env
+
+# Database
+prisma/dev.db
+
+# Build outputs
+tsconfig.tsbuildinfo
+next-env.d.ts
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug / test artifacts
+*.py
+after_x*.png
+stop
+standalone.html
+lanyard_page.html
+Hero.tsx.tmp
+
+# Docs & plans
+docs/
+.trae/
+backup/
