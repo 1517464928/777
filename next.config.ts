@@ -1,9 +1,13 @@
 import type { NextConfig } from 'next';
 
-const basePath = process.env.NODE_ENV === 'production' ? '/person' : '';
+// basePath 由环境变量显式控制：
+// - GitHub Pages 部署：CI 中设置 NEXT_PUBLIC_BASE_PATH=/666
+// - Electron / 本地 / Vercel：默认空字符串
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 const nextConfig: NextConfig = {
   output: 'export',
+  trailingSlash: true,
   images: { unoptimized: true },
   basePath,
   env: {

@@ -13,6 +13,9 @@ tsconfig.tsbuildinfo
 next-env.d.ts
 out/
 
+# Electron 构建产物
+dist-electron*/
+
 # IDE
 .vscode/
 .idea/
@@ -37,3 +40,6 @@ backup/
 .iga/
 
 .vercel
+
+# Cloudflare
+.wrangler/

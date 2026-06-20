@@ -1,7 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useMusic } from "./MusicContext";
 import SplitText from "./animations/SplitText";
@@ -27,6 +26,17 @@ export default function Hero() {
 
   if (loading) return null;
 
+  const handleExplore = () => {
+    enableMusic();
+    const a = audioRef.current;
+    if (a) {
+      a.currentTime = 0;
+      a.muted = false;
+      a.play().catch(() => {});
+    }
+    document.getElementById("why-transition-question")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-transparent">
       <div className="relative z-10 text-center px-4 w-full max-w-4xl">
@@ -42,19 +52,17 @@ export default function Hero() {
           tag="h1"
         />
 
-        <Link href="/about">
-          <motion.button
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
-            whileHover={{ scale: 1.05, boxShadow: "0 12px 24px rgba(249,115,22,0.3)" }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => { enableMusic(); const a = audioRef.current; if (a) { a.currentTime = 0; a.muted = false; a.play().catch(() => {}); } }}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[#f97316] text-white rounded-full text-base font-medium hover:bg-[#ea580c] transition-colors duration-300 cursor-pointer shadow-lg"
-          >
-            {btnText} <ArrowRight size={18} />
-          </motion.button>
-        </Link>
+        <motion.button
+          initial={{ opacity: 0, y: 20, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          whileHover={{ scale: 1.05, boxShadow: "0 12px 24px rgba(249,115,22,0.3)" }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleExplore}
+          className="inline-flex items-center gap-2 px-8 py-4 bg-[#f97316] text-white rounded-full text-base font-medium hover:bg-[#ea580c] transition-colors duration-300 cursor-pointer shadow-lg"
+        >
+          {btnText} <ChevronDown size={18} />
+        </motion.button>
       </div>
     </section>
   );
