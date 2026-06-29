@@ -11,7 +11,6 @@ export default function Hero() {
   const { enableMusic, audioRef } = useMusic();
   const [title, setTitle] = useState("张攀岳");
   const [btnText, setBtnText] = useState("了解更多");
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/data.json`)
@@ -21,12 +20,9 @@ export default function Hero() {
           setTitle(d.siteConfig.heroTitle || "张攀岳");
           setBtnText(d.siteConfig.heroButtonText || "了解更多");
         }
-        setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {});
   }, []);
-
-  if (loading) return null;
 
   const handleExplore = () => {
     enableMusic();
