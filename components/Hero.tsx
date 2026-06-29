@@ -2,10 +2,12 @@
 import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useMusic } from "./MusicContext";
 import SplitText from "./animations/SplitText";
 
 export default function Hero() {
+  const router = useRouter();
   const { enableMusic, audioRef } = useMusic();
   const [title, setTitle] = useState("张攀岳");
   const [btnText, setBtnText] = useState("了解更多");
@@ -34,7 +36,7 @@ export default function Hero() {
       a.muted = false;
       a.play().catch(() => {});
     }
-    document.getElementById("why-transition-question")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    router.push("/about/");
   };
 
   return (

@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 // basePath 由环境变量显式控制：
-// - GitHub Pages 部署：CI 中设置 NEXT_PUBLIC_BASE_PATH=/join-feishu
+// - GitHub Pages 部署：CI 中设置 NEXT_PUBLIC_BASE_PATH=/777
 // - Electron / 本地 / Vercel：默认空字符串
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
