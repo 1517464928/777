@@ -22,29 +22,29 @@ export default function MusicScreen({
 }: MusicScreenProps) {
   const variants = projectsVariants(reducedMotion);
   const { pauseMusic } = useMusic();
+  const base = process.env.NEXT_PUBLIC_BASE_PATH || "";
   const [tracks, setTracks] = useState<MusicData[]>([
     {
       id: 1,
       title: "阴云密布的大城市",
       subtitle: "3.1",
-      src: "/music/3.1阴云密布的大城市.mp3",
+      src: `${base}/music/3.1阴云密布的大城市.mp3`,
       description: "一首关于城市氛围的原创音乐",
     },
     {
       id: 2,
       title: "水面上起来了风",
       subtitle: "4.30",
-      src: "/music/4.30水面上起来了风.mp3",
+      src: `${base}/music/4.30水面上起来了风.mp3`,
       description: "一首关于水面微风的原创音乐",
     },
   ]);
   const audioRefs = useRef<(HTMLAudioElement | null)[]>([]);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/data.json`)
+    fetch(`${base}/data.json`)
       .then((r) => r.json())
       .then((d) => {
-        const base = process.env.NEXT_PUBLIC_BASE_PATH || "";
         const items = (d.music || []).map((m: MusicData) => ({
           ...m,
           src: m.src ? `${base}${m.src}` : m.src,
@@ -52,7 +52,7 @@ export default function MusicScreen({
         if (items.length > 0) setTracks(items);
       })
       .catch(() => {});
-  }, []);
+  }, [base]);
 
   // Pause background music and all other tracks when one starts playing
   const handlePlay = (index: number) => {
@@ -102,12 +102,13 @@ export default function MusicScreen({
                 <p className="text-sm text-[#1a1a1a]/60 mb-5">{track.description}</p>
                 <audio
                   ref={(el) => { audioRefs.current[i] = el; }}
+                  key={track.src}
+                  src={track.src}
                   controls
                   preload="metadata"
                   className="w-full"
                   onPlay={() => handlePlay(i)}
                 >
-                  <source src={track.src} type="audio/mpeg" />
                   您的浏览器不支持音频播放。
                 </audio>
               </Card>
