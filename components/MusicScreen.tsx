@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ChevronDown, Music } from "lucide-react";
 import { projectsVariants } from "@/lib/animations";
 import type { MusicData } from "@/lib/types";
+import { useMusic } from "./MusicContext";
 import Card from "./ui/Card";
 import Reveal from "./ui/Reveal";
 
@@ -20,6 +21,7 @@ export default function MusicScreen({
   screenIndex,
 }: MusicScreenProps) {
   const variants = projectsVariants(reducedMotion);
+  const { pauseMusic } = useMusic();
   const [tracks, setTracks] = useState<MusicData[]>([
     {
       id: 1,
@@ -52,8 +54,9 @@ export default function MusicScreen({
       .catch(() => {});
   }, []);
 
-  // Pause all other tracks when one starts playing
+  // Pause background music and all other tracks when one starts playing
   const handlePlay = (index: number) => {
+    pauseMusic();
     audioRefs.current.forEach((audio, i) => {
       if (audio && i !== index) {
         audio.pause();

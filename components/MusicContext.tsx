@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode,
 interface MusicContextValue {
   enabled: boolean;
   enableMusic: () => void;
+  pauseMusic: () => void;
   audioRef: RefObject<HTMLAudioElement | null>;
 }
 
@@ -26,8 +27,12 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     setEnabled(true);
   };
 
+  const pauseMusic = () => {
+    audioRef.current?.pause();
+  };
+
   return (
-    <MusicContext.Provider value={{ enabled, enableMusic, audioRef }}>
+    <MusicContext.Provider value={{ enabled, enableMusic, pauseMusic, audioRef }}>
       {children}
     </MusicContext.Provider>
   );
