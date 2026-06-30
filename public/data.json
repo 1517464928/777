@@ -225,6 +225,22 @@
       "style": "{}"
     }
   ],
+  "music": [
+    {
+      "id": 1,
+      "title": "阴云密布的大城市",
+      "subtitle": "3.1",
+      "src": "/music/3.1阴云密布的大城市.mp3",
+      "description": "一首关于城市氛围的原创音乐"
+    },
+    {
+      "id": 2,
+      "title": "水面上起来了风",
+      "subtitle": "4.30",
+      "src": "/music/4.30水面上起来了风.mp3",
+      "description": "一首关于水面微风的原创音乐"
+    }
+  ],
   "socialLinks": [
     {
       "id": 5,

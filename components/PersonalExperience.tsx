@@ -15,6 +15,7 @@ import ExperiencePages from "./ExperiencePages";
 import PersonalAdvantages from "./PersonalAdvantages";
 import ProjectsSection from "./Projects";
 import AskMeContent from "./AskMe";
+import MusicScreen from "./MusicScreen";
 
 const typeLabels: Record<string, string> = {
   education: "教育背景",
@@ -132,6 +133,7 @@ export default function PersonalExperience() {
     { type: "advantages" as const },
     { type: "cta" as const },
     { type: "cta2" as const },
+    { type: "music" as const },
     { type: "askme" as const },
   ];
 
@@ -270,6 +272,15 @@ export default function PersonalExperience() {
             {screen.type === "cta2" && (
               <div data-screen="cta2" className="h-full w-full">
                 <ProjectsScreen2
+                  isActive={activeIndex === i}
+                  reducedMotion={reducedMotion}
+                  screenIndex={i}
+                />
+              </div>
+            )}
+            {screen.type === "music" && (
+              <div data-screen="music" className="h-full w-full">
+                <MusicScreen
                   isActive={activeIndex === i}
                   reducedMotion={reducedMotion}
                   screenIndex={i}

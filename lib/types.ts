@@ -95,6 +95,14 @@ export interface ProjectData {
   order: number;
 }
 
+export interface MusicData {
+  id: number;
+  title: string;
+  subtitle: string;
+  src: string;
+  description: string;
+}
+
 export interface SocialLinkData {
   id: number;
   platform: string;
